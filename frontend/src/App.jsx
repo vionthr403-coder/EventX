@@ -4,7 +4,10 @@ import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import "./App.css";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// =========================
+// LIVE BACKEND URL
+// =========================
+const API_URL = "https://eventx-s09g.onrender.com";
 
 const technicalEvents = [
   "Paper Presentation",
@@ -49,6 +52,9 @@ function App() {
 
   const [registeredTeamId, setRegisteredTeamId] = useState("");
 
+  // =========================
+  // FORM CHANGE
+  // =========================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -76,6 +82,9 @@ function App() {
     }
   };
 
+  // =========================
+  // MEMBER CHANGE
+  // =========================
   const handleMemberChange = (index, field, value) => {
     setMembers((prev) => {
       const updated = [...prev];
@@ -89,6 +98,9 @@ function App() {
     });
   };
 
+  // =========================
+  // TECHNICAL EVENTS
+  // =========================
   const toggleTechnical = (eventName) => {
     setTechnical((prev) =>
       prev.includes(eventName)
@@ -97,6 +109,9 @@ function App() {
     );
   };
 
+  // =========================
+  // NON TECHNICAL EVENTS
+  // =========================
   const toggleNonTechnical = (eventName) => {
     setNonTechnical((prev) =>
       prev.includes(eventName)
@@ -122,9 +137,10 @@ function App() {
       });
 
       setOtpSent(true);
+
       alert("OTP sent successfully to your email.");
     } catch (error) {
-      console.error(error);
+      console.error("OTP Error:", error);
 
       alert(
         error.response?.data?.message ||
@@ -158,10 +174,11 @@ function App() {
       if (response.data) {
         setEmailVerified(true);
         setOtpSent(false);
+
         alert("Email verified successfully!");
       }
     } catch (error) {
-      console.error(error);
+      console.error("Verify OTP Error:", error);
 
       alert(
         error.response?.data?.message ||
@@ -252,16 +269,20 @@ function App() {
       doc.addImage(qrData, "PNG", 140, 70, 45, 45);
 
       doc.setFontSize(10);
+
       doc.text(
         "Please keep this receipt for future reference.",
         105,
         270,
-        { align: "center" }
+        {
+          align: "center",
+        }
       );
 
       doc.save(`EventX_Receipt_${teamId}.pdf`);
     } catch (error) {
       console.error("Receipt Error:", error);
+
       alert("Failed to generate receipt.");
     }
   };
@@ -360,6 +381,7 @@ function App() {
         <p>Ramco Institute of Technology</p>
 
         <span>Symposium Registration</span>
+
       </header>
 
       {/* ================= MAIN ================= */}
@@ -367,7 +389,7 @@ function App() {
 
         <form onSubmit={handleSubmit}>
 
-          {/* PARTICIPANT DETAILS */}
+          {/* ================= PARTICIPANT DETAILS ================= */}
           <section className="section">
 
             <h2>Participant Details</h2>
@@ -375,6 +397,7 @@ function App() {
             <div className="form-grid">
 
               <div className="field">
+
                 <label>Team Leader Name</label>
 
                 <input
@@ -385,9 +408,11 @@ function App() {
                   onChange={handleChange}
                   required
                 />
+
               </div>
 
               <div className="field">
+
                 <label>Phone Number</label>
 
                 <input
@@ -398,6 +423,7 @@ function App() {
                   onChange={handleChange}
                   required
                 />
+
               </div>
 
               {/* EMAIL */}
@@ -430,16 +456,19 @@ function App() {
                     }
                     className="otp-button"
                   >
+
                     {emailVerified
                       ? "EMAIL VERIFIED ✓"
                       : otpLoading
                       ? "SENDING..."
                       : "SEND OTP"}
+
                   </button>
 
                 </div>
 
                 {otpSent && !emailVerified && (
+
                   <div className="otp-box">
 
                     <input
@@ -458,23 +487,30 @@ function App() {
                       disabled={otpLoading}
                       className="verify-button"
                     >
+
                       {otpLoading
                         ? "VERIFYING..."
                         : "VERIFY OTP"}
+
                     </button>
 
                   </div>
+
                 )}
 
                 {emailVerified && (
+
                   <p className="verified-message">
                     ✓ Email verified successfully
                   </p>
+
                 )}
 
               </div>
 
+              {/* DEPARTMENT */}
               <div className="field">
+
                 <label>Department</label>
 
                 <input
@@ -485,9 +521,12 @@ function App() {
                   onChange={handleChange}
                   required
                 />
+
               </div>
 
+              {/* YEAR */}
               <div className="field">
+
                 <label>Year</label>
 
                 <select
@@ -496,6 +535,7 @@ function App() {
                   onChange={handleChange}
                   required
                 >
+
                   <option value="">
                     Select Year
                   </option>
@@ -515,10 +555,14 @@ function App() {
                   <option value="4">
                     IV Year
                   </option>
+
                 </select>
+
               </div>
 
+              {/* TEAM NAME */}
               <div className="field">
+
                 <label>Team Name</label>
 
                 <input
@@ -529,9 +573,12 @@ function App() {
                   onChange={handleChange}
                   required
                 />
+
               </div>
 
+              {/* TEAM SIZE */}
               <div className="field">
+
                 <label>Team Size</label>
 
                 <select
@@ -540,18 +587,36 @@ function App() {
                   onChange={handleChange}
                   required
                 >
-                  <option value="1">1 Member</option>
-                  <option value="2">2 Members</option>
-                  <option value="3">3 Members</option>
-                  <option value="4">4 Members</option>
-                  <option value="5">5 Members</option>
+
+                  <option value="1">
+                    1 Member
+                  </option>
+
+                  <option value="2">
+                    2 Members
+                  </option>
+
+                  <option value="3">
+                    3 Members
+                  </option>
+
+                  <option value="4">
+                    4 Members
+                  </option>
+
+                  <option value="5">
+                    5 Members
+                  </option>
+
                 </select>
+
               </div>
 
             </div>
+
           </section>
 
-          {/* TEAM MEMBERS */}
+          {/* ================= TEAM MEMBERS ================= */}
           <section className="section">
 
             <h2>Team Members</h2>
@@ -637,7 +702,7 @@ function App() {
 
           </section>
 
-          {/* TECHNICAL EVENTS */}
+          {/* ================= TECHNICAL EVENTS ================= */}
           <section className="section">
 
             <h2>Technical Events</h2>
@@ -677,7 +742,7 @@ function App() {
 
           </section>
 
-          {/* NON TECHNICAL EVENTS */}
+          {/* ================= NON TECHNICAL EVENTS ================= */}
           <section className="section">
 
             <h2>Non-Technical Events</h2>
@@ -717,7 +782,7 @@ function App() {
 
           </section>
 
-          {/* REGISTER */}
+          {/* ================= REGISTER ================= */}
           <section className="section submit-section">
 
             <button
@@ -731,11 +796,14 @@ function App() {
 
         </form>
 
-        {/* SUCCESS */}
+        {/* ================= SUCCESS ================= */}
         {registeredTeamId && (
+
           <section className="section success-section">
 
-            <h2>Registration Successful 🎉</h2>
+            <h2>
+              Registration Successful 🎉
+            </h2>
 
             <p>
               Your Team ID:
@@ -756,15 +824,18 @@ function App() {
             </button>
 
           </section>
+
         )}
 
       </main>
 
-      {/* FOOTER */}
+      {/* ================= FOOTER ================= */}
       <footer className="footer">
+
         <p>
           © 2026 EventX | Ramco Institute of Technology
         </p>
+
       </footer>
 
     </div>
