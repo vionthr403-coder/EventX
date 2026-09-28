@@ -1,28 +1,23 @@
 /* =========================================
-   EVENTX 2026
-   RAMCO INSTITUTE OF TECHNOLOGY
-   BLUE & WHITE THEME
+   EVENTX 2026 - PROFESSIONAL BLUE WHITE UI
    ========================================= */
 
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
+  margin: 0;
   font-family: Arial, Helvetica, sans-serif;
-  background: #f4f7fc;
+  background: #f4f8ff;
   color: #1f2937;
 }
 
-/* =========================================
-   APP
-   ========================================= */
+button,
+input,
+select {
+  font-family: inherit;
+}
 
 .app {
   min-height: 100vh;
@@ -42,57 +37,50 @@ body {
   width: 100%;
   max-width: 1150px;
   margin: 0 auto;
-
-  padding: 32px 25px 38px;
-
+  padding: 28px 25px 36px;
   text-align: center;
-
   background: linear-gradient(
     135deg,
     #0d47a1,
     #1976d2
   );
-
   color: white;
-
   border-radius: 0 0 28px 28px;
-
-  box-shadow:
-    0 10px 30px rgba(13, 71, 161, 0.25);
+  box-shadow: 0 10px 30px rgba(13, 71, 161, 0.25);
 }
 
-.college-name {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 2px;
-  margin-bottom: 8px;
+.rit-logo {
+  width: 82px;
+  height: 82px;
+  object-fit: contain;
+  background: white;
+  padding: 7px;
+  border-radius: 50%;
+  margin-bottom: 12px;
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease;
+}
+
+.rit-logo:hover {
+  transform: scale(1.06);
 }
 
 .header h1 {
-  font-size: 48px;
-  font-weight: 900;
-  letter-spacing: 6px;
-  line-height: 1;
-
-  color: white;
-
-  margin: 8px 0;
-}
-
-.symposium {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 3px;
-  margin-top: 8px;
-}
-
-.tagline {
-  margin-top: 12px;
-
-  font-size: 14px;
-
+  margin: 5px 0 8px;
+  font-size: 34px;
+  font-weight: 800;
   letter-spacing: 1px;
+}
 
+.header p {
+  margin: 0 0 7px;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.header span {
+  display: inline-block;
+  font-size: 14px;
   opacity: 0.95;
 }
 
@@ -103,47 +91,34 @@ body {
 .container {
   width: 92%;
   max-width: 1050px;
-
   margin: 30px auto 45px;
 }
 
 /* =========================================
-   SECTION
+   SECTIONS
    ========================================= */
 
 .section {
-  background: white;
-
+  background: #ffffff;
   padding: 28px 30px;
-
   margin-bottom: 22px;
-
   border-radius: 16px;
-
   border: 1px solid #dce6f3;
-
-  box-shadow:
-    0 5px 18px rgba(30, 64, 175, 0.08);
+  box-shadow: 0 5px 18px rgba(30, 64, 175, 0.08);
 }
 
 .section h2 {
-  font-size: 22px;
-
+  margin: 0 0 20px;
   color: #0d47a1;
-
-  margin-bottom: 8px;
-
-  padding-left: 12px;
-
-  border-left: 5px solid #1976d2;
+  font-size: 21px;
+  font-weight: 750;
 }
 
-.section-info {
+.section > p {
+  margin-top: -10px;
+  margin-bottom: 18px;
   color: #64748b;
-
-  font-size: 13px;
-
-  margin-bottom: 20px;
+  font-size: 14px;
 }
 
 /* =========================================
@@ -152,11 +127,8 @@ body {
 
 .form-grid {
   display: grid;
-
   grid-template-columns: 1fr 1fr;
-
   column-gap: 24px;
-
   row-gap: 18px;
 }
 
@@ -165,50 +137,35 @@ body {
 }
 
 /* =========================================
-   FIELD
+   FORM FIELDS
    ========================================= */
 
 .field {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .field label {
-  display: block;
-
-  font-size: 14px;
-
-  font-weight: 700;
-
-  color: #334155;
-
   margin-bottom: 7px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
 }
-
-/* =========================================
-   INPUT + SELECT
-   ========================================= */
 
 .field input,
 .field select {
   width: 100%;
-
   height: 44px;
-
   padding: 0 13px;
-
   border: 1px solid #cbd5e1;
-
   border-radius: 8px;
-
-  background: white;
-
+  background: #ffffff;
   color: #1e293b;
-
   font-size: 14px;
-
   outline: none;
-
-  transition: 0.2s;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .field input::placeholder {
@@ -218,403 +175,268 @@ body {
 .field input:focus,
 .field select:focus {
   border-color: #1976d2;
-
-  box-shadow:
-    0 0 0 3px rgba(25, 118, 210, 0.12);
-
-  background: white;
+  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
 }
 
 /* =========================================
-   EMAIL + SEND OTP
+   EMAIL + OTP
    ========================================= */
-
-/*
-   IMPORTANT:
-   This makes the email input and SEND OTP
-   appear in the SAME ROW.
-*/
 
 .email-otp-row {
   display: flex;
-
   align-items: center;
-
   width: 100%;
-
   gap: 12px;
 }
 
 .email-otp-row input {
   flex: 1;
-
   min-width: 0;
 }
 
-/* =========================================
-   SEND OTP BUTTON
-   ========================================= */
-
 .otp-button {
   flex: 0 0 125px;
-
   width: 125px;
-
   height: 44px;
-
-  margin-left: 0;
-
-  padding: 0 14px;
-
   border: none;
-
   border-radius: 8px;
-
   background: #1976d2;
-
   color: white;
-
   font-size: 13px;
-
   font-weight: 700;
-
   cursor: pointer;
-
-  transition: all 0.2s ease;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
 }
 
-.otp-button:hover {
+.otp-button:hover:not(:disabled) {
   background: #0d47a1;
-
   transform: translateY(-1px);
 }
 
 .otp-button:disabled {
-  background: #94a3b8;
-
+  opacity: 0.75;
   cursor: not-allowed;
-
-  transform: none;
 }
 
-/* =========================================
-   OTP BOX
-   ========================================= */
-
 .otp-box {
+  display: flex;
+  gap: 10px;
   margin-top: 12px;
-
-  padding: 15px;
-
-  border-radius: 10px;
-
-  background: #f1f7ff;
-
-  border: 1px solid #c9def5;
 }
 
 .otp-box input {
-  width: 100%;
-
+  flex: 1;
   height: 42px;
-
   padding: 0 12px;
-
   border: 1px solid #cbd5e1;
-
   border-radius: 8px;
-
   outline: none;
-
-  margin-bottom: 10px;
 }
-
-/* =========================================
-   VERIFY OTP
-   ========================================= */
 
 .verify-button {
-  width: 100%;
-
   height: 42px;
-
+  padding: 0 18px;
   border: none;
-
   border-radius: 8px;
-
   background: #1565c0;
-
   color: white;
-
+  font-size: 13px;
   font-weight: 700;
-
   cursor: pointer;
-
-  transition: 0.2s;
 }
 
-.verify-button:hover {
+.verify-button:hover:not(:disabled) {
   background: #0d47a1;
 }
 
-/* =========================================
-   VERIFIED MESSAGE
-   ========================================= */
-
 .verified-message {
-  margin-top: 10px;
-
-  padding: 10px 12px;
-
-  text-align: center;
-
-  border-radius: 8px;
-
-  background: #e8f5e9;
-
-  border: 1px solid #a5d6a7;
-
-  color: #2e7d32;
-
+  margin: 8px 0 0;
+  color: #16803c;
   font-size: 13px;
-
   font-weight: 700;
 }
 
 /* =========================================
-   TEAM MEMBERS
+   TEAM MEMBER CARDS
    ========================================= */
 
-.members-container {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 15px;
+.member-card {
+  margin-bottom: 18px;
+  padding: 20px;
+  border: 1px solid #dce6f3;
+  border-radius: 12px;
+  background: #f8fbff;
 }
 
-.member-card {
-  padding: 20px;
-
-  background: #f8fbff;
-
-  border: 1px solid #d9e4f2;
-
-  border-radius: 12px;
+.member-card:last-child {
+  margin-bottom: 0;
 }
 
 .member-card h3 {
+  margin: 0 0 17px;
+  color: #1565c0;
   font-size: 16px;
-
-  color: #0d47a1;
-
-  margin-bottom: 16px;
-
-  padding-bottom: 9px;
-
-  border-bottom: 1px solid #dce6f3;
 }
 
 /* =========================================
-   EVENTS
+   EVENT SELECTION - PROFESSIONAL CARDS
    ========================================= */
 
 .event-grid {
   display: grid;
-
   grid-template-columns: 1fr 1fr;
-
   gap: 14px;
-
-  margin-top: 10px;
 }
 
-/* =========================================
-   EVENT OPTION
-   ========================================= */
+/* Hide the default checkbox */
+.event-card input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
 
-.event-option {
+/* Main event card */
+.event-card {
+  position: relative;
   display: flex;
-
   align-items: center;
-
-  gap: 12px;
-
-  min-height: 52px;
-
-  padding: 13px 15px;
-
-  background: #f9fbff;
-
+  min-height: 62px;
+  padding: 16px 18px;
   border: 1px solid #d7e1ee;
-
-  border-radius: 9px;
-
+  border-radius: 11px;
+  background: #ffffff;
   color: #334155;
-
+  cursor: pointer;
   font-size: 14px;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  transition: all 0.2s ease;
+  font-weight: 650;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
 }
 
-.event-option:hover {
+/* Small selection indicator */
+.event-card::before {
+  content: "";
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  margin-right: 12px;
+  border: 2px solid #b8c7d9;
+  border-radius: 5px;
+  background: white;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease;
+}
+
+/* Hover */
+.event-card:hover {
   border-color: #1976d2;
-
-  background: #f0f7ff;
+  box-shadow: 0 5px 15px rgba(25, 118, 210, 0.1);
+  transform: translateY(-1px);
 }
 
-.event-option input[type="checkbox"] {
-  width: 18px;
+/* Selected card */
+.event-card.selected {
+  border-color: #1976d2;
+  background: #f1f7ff;
+  color: #0d47a1;
+  box-shadow: 0 5px 16px rgba(25, 118, 210, 0.12);
+}
 
-  height: 18px;
-
-  margin: 0;
-
-  accent-color: #1976d2;
-
-  cursor: pointer;
+/* Selected indicator */
+.event-card.selected::before {
+  content: "✓";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1976d2;
+  border-color: #1976d2;
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 /* =========================================
-   REGISTER
+   REGISTER BUTTON
    ========================================= */
 
-.submit-area {
-  margin-top: 25px;
-
+.submit-section {
   text-align: center;
+  padding: 25px 30px;
 }
 
 .register-button {
   width: 100%;
-
-  height: 52px;
-
+  max-width: 450px;
+  height: 50px;
   border: none;
-
-  border-radius: 10px;
-
+  border-radius: 9px;
   background: linear-gradient(
     135deg,
     #0d47a1,
     #1976d2
   );
-
   color: white;
-
-  font-size: 16px;
-
+  font-size: 15px;
   font-weight: 800;
-
-  letter-spacing: 0.5px;
-
+  letter-spacing: 0.3px;
   cursor: pointer;
-
-  box-shadow:
-    0 6px 15px rgba(25, 118, 210, 0.25);
-
-  transition: all 0.2s ease;
+  box-shadow: 0 7px 18px rgba(13, 71, 161, 0.22);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .register-button:hover {
-  background: linear-gradient(
-    135deg,
-    #083b88,
-    #1565c0
-  );
-
   transform: translateY(-2px);
-
-  box-shadow:
-    0 8px 18px rgba(25, 118, 210, 0.3);
-}
-
-.register-button:disabled {
-  background: #94a3b8;
-
-  cursor: not-allowed;
-
-  transform: none;
-
-  box-shadow: none;
+  box-shadow: 0 10px 23px rgba(13, 71, 161, 0.3);
 }
 
 /* =========================================
-   SUCCESS
+   SUCCESS SECTION
    ========================================= */
 
-.success-message {
-  padding: 15px;
-
-  margin-bottom: 20px;
-
-  border-radius: 10px;
-
-  background: #e8f5e9;
-
-  border: 1px solid #a5d6a7;
-
-  color: #2e7d32;
-
+.success-section {
   text-align: center;
-
-  font-weight: 700;
+  border-color: #b9dfc5;
+  background: #f7fff9;
 }
 
-/* =========================================
-   ERROR
-   ========================================= */
-
-.error-message {
-  padding: 12px 15px;
-
-  margin-top: 12px;
-
-  border-radius: 8px;
-
-  background: #ffebee;
-
-  border: 1px solid #ef9a9a;
-
-  color: #c62828;
-
-  font-size: 13px;
-
-  font-weight: 600;
+.success-section h2 {
+  color: #16803c;
 }
 
-/* =========================================
-   DOWNLOAD BUTTON
-   ========================================= */
+.success-section p {
+  margin-bottom: 7px;
+  color: #475569;
+}
+
+.success-section strong {
+  display: block;
+  margin-bottom: 20px;
+  color: #0d47a1;
+  font-size: 25px;
+  letter-spacing: 1px;
+}
 
 .download-button {
-  width: 100%;
-
-  height: 45px;
-
-  margin-top: 12px;
-
-  border: 2px solid #1976d2;
-
+  height: 44px;
+  padding: 0 22px;
+  border: none;
   border-radius: 8px;
-
-  background: white;
-
-  color: #1565c0;
-
-  font-size: 14px;
-
+  background: #1976d2;
+  color: white;
   font-weight: 700;
-
   cursor: pointer;
 }
 
 .download-button:hover {
-  background: #eaf4ff;
+  background: #0d47a1;
 }
 
 /* =========================================
@@ -623,14 +445,13 @@ body {
 
 .footer {
   text-align: center;
-
-  padding: 25px 15px 35px;
-
+  padding: 22px 15px 30px;
   color: #64748b;
-
   font-size: 13px;
+}
 
-  line-height: 1.8;
+.footer p {
+  margin: 0;
 }
 
 /* =========================================
@@ -640,39 +461,25 @@ body {
 @media (max-width: 768px) {
 
   .header {
-    width: 100%;
-
-    padding: 28px 18px 32px;
-
     border-radius: 0 0 22px 22px;
-  }
-
-  .college-name {
-    font-size: 12px;
-
-    letter-spacing: 1.5px;
+    padding: 25px 18px 30px;
   }
 
   .header h1 {
-    font-size: 38px;
-
-    letter-spacing: 4px;
+    font-size: 28px;
   }
 
-  .symposium {
-    font-size: 17px;
-
-    letter-spacing: 2px;
+  .header p {
+    font-size: 15px;
   }
 
   .container {
     width: 94%;
-
     margin-top: 22px;
   }
 
   .section {
-    padding: 22px 20px;
+    padding: 22px 18px;
   }
 
   .form-grid {
@@ -694,88 +501,53 @@ body {
 
 @media (max-width: 480px) {
 
-  .header {
-    padding: 24px 12px 28px;
-  }
-
-  .college-name {
-    font-size: 10px;
-
-    letter-spacing: 1px;
-  }
-
   .header h1 {
-    font-size: 32px;
-
-    letter-spacing: 3px;
+    font-size: 24px;
   }
 
-  .symposium {
-    font-size: 15px;
-
-    letter-spacing: 1.5px;
-  }
-
-  .tagline {
-    font-size: 12px;
-  }
-
-  .container {
-    width: 94%;
-
-    margin-top: 18px;
+  .rit-logo {
+    width: 70px;
+    height: 70px;
   }
 
   .section {
-    padding: 18px 15px;
-
-    border-radius: 12px;
+    padding: 20px 15px;
+    border-radius: 13px;
   }
 
   .section h2 {
     font-size: 19px;
   }
 
-  .field label {
-    font-size: 13px;
-  }
-
-  .field input,
-  .field select {
-    height: 43px;
-
-    font-size: 13px;
-  }
-
-  /* Mobile-la button கீழே வரட்டும் */
-
   .email-otp-row {
     flex-direction: column;
-
     align-items: stretch;
-
     gap: 10px;
   }
 
   .otp-button {
     width: 100%;
-
     flex: none;
+  }
+
+  .otp-box {
+    flex-direction: column;
+  }
+
+  .verify-button {
+    width: 100%;
   }
 
   .member-card {
     padding: 15px;
   }
 
-  .event-option {
-    min-height: 48px;
-
-    font-size: 13px;
+  .event-card {
+    min-height: 58px;
+    padding: 14px;
   }
 
   .register-button {
-    height: 50px;
-
-    font-size: 15px;
+    font-size: 13px;
   }
 }
