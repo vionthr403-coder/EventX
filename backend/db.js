@@ -9,6 +9,9 @@ const pool = new Pool(
         ssl: {
           rejectUnauthorized: false,
         },
+        max: 5,
+        idleTimeoutMillis: 30000,
+        connectionTimeoutMillis: 10000,
       }
     : {
         user: process.env.DB_USER,
@@ -19,10 +22,19 @@ const pool = new Pool(
       }
 );
 
-pool.connect()
-  .then(() => console.log("PostgreSQL Connected Successfully!"))
-  .catch((error) =>
-    console.error("PostgreSQL Connection Failed:", error.message)
-  );
+// Prevent Neon idle connection errors from crashing the server
+pool.on("error", (error) => {
+  console.error("PostgreSQL Pool Error:", error.message);
+});
+
+// Test database connection
+pool
+  .query("SELECT 1")
+  .then(() => {
+    console.log("PostgreSQL Connected Successfully!");
+  })
+  .catch((error) => {
+    console.error("PostgreSQL Connection Failed:", error.message);
+  });
 
 module.exports = pool;
