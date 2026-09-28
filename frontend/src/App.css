@@ -1,16 +1,17 @@
 /* =========================================
-   EVENTX 2026 - PROFESSIONAL BLUE WHITE UI
+   EVENTX - APP CSS
    ========================================= */
 
 * {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
   font-family: Arial, Helvetica, sans-serif;
-  background: #f4f8ff;
-  color: #1f2937;
+  background: #f5f6f8;
+  color: #222;
 }
 
 button,
@@ -19,14 +20,13 @@ select {
   font-family: inherit;
 }
 
+/* =========================================
+   APP
+   ========================================= */
+
 .app {
   min-height: 100vh;
-  background: linear-gradient(
-    135deg,
-    #f4f8ff 0%,
-    #ffffff 50%,
-    #eef5ff 100%
-  );
+  background: #f5f6f8;
 }
 
 /* =========================================
@@ -34,54 +34,35 @@ select {
    ========================================= */
 
 .header {
-  width: 100%;
-  max-width: 1150px;
-  margin: 0 auto;
-  padding: 28px 25px 36px;
   text-align: center;
-  background: linear-gradient(
-    135deg,
-    #0d47a1,
-    #1976d2
-  );
-  color: white;
-  border-radius: 0 0 28px 28px;
-  box-shadow: 0 10px 30px rgba(13, 71, 161, 0.25);
+  padding: 32px 20px 28px;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
 }
 
-.rit-logo {
-  width: 82px;
-  height: 82px;
-  object-fit: contain;
-  background: white;
-  padding: 7px;
-  border-radius: 50%;
-  margin-bottom: 12px;
-  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
-}
-
-.rit-logo:hover {
-  transform: scale(1.06);
+.college-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  margin-bottom: 8px;
 }
 
 .header h1 {
-  margin: 5px 0 8px;
-  font-size: 34px;
+  font-size: 42px;
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 3px;
+  margin-bottom: 6px;
 }
 
-.header p {
-  margin: 0 0 7px;
+.symposium {
   font-size: 17px;
   font-weight: 600;
+  margin-bottom: 7px;
 }
 
-.header span {
-  display: inline-block;
+.tagline {
   font-size: 14px;
-  opacity: 0.95;
+  color: #666;
 }
 
 /* =========================================
@@ -89,36 +70,28 @@ select {
    ========================================= */
 
 .container {
-  width: 92%;
-  max-width: 1050px;
-  margin: 30px auto 45px;
+  width: min(100% - 30px, 1050px);
+  margin: 30px auto;
 }
-
-/* =========================================
-   SECTIONS
-   ========================================= */
 
 .section {
   background: #ffffff;
-  padding: 28px 30px;
+  border: 1px solid #e5e5e5;
+  border-radius: 14px;
+  padding: 25px;
   margin-bottom: 22px;
-  border-radius: 16px;
-  border: 1px solid #dce6f3;
-  box-shadow: 0 5px 18px rgba(30, 64, 175, 0.08);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.05);
 }
 
 .section h2 {
-  margin: 0 0 20px;
-  color: #0d47a1;
   font-size: 21px;
-  font-weight: 750;
+  margin-bottom: 8px;
 }
 
-.section > p {
-  margin-top: -10px;
-  margin-bottom: 18px;
-  color: #64748b;
+.section-info {
   font-size: 14px;
+  color: #666;
+  margin-bottom: 20px;
 }
 
 /* =========================================
@@ -127,9 +100,8 @@ select {
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  column-gap: 24px;
-  row-gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
 }
 
 .full-width {
@@ -137,306 +109,183 @@ select {
 }
 
 /* =========================================
-   FORM FIELDS
+   FIELD
    ========================================= */
 
 .field {
   display: flex;
   flex-direction: column;
+  gap: 7px;
 }
 
 .field label {
-  margin-bottom: 7px;
   font-size: 14px;
-  font-weight: 700;
-  color: #334155;
+  font-weight: 600;
 }
 
 .field input,
 .field select {
   width: 100%;
-  height: 44px;
+  height: 45px;
   padding: 0 13px;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #d6d6d6;
   border-radius: 8px;
   background: #ffffff;
-  color: #1e293b;
-  font-size: 14px;
   outline: none;
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.field input::placeholder {
-  color: #94a3b8;
+  font-size: 14px;
+  transition: 0.2s ease;
 }
 
 .field input:focus,
 .field select:focus {
-  border-color: #1976d2;
-  box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.12);
+  border-color: #777;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
 }
 
 /* =========================================
-   EMAIL + OTP
+   VERIFY EMAIL BUTTON
    ========================================= */
 
-.email-otp-row {
-  display: flex;
-  align-items: center;
-  width: 100%;
-  gap: 12px;
-}
-
-.email-otp-row input {
-  flex: 1;
-  min-width: 0;
-}
-
 .otp-button {
-  flex: 0 0 125px;
-  width: 125px;
-  height: 44px;
+  width: fit-content;
+  min-width: 125px;
+  height: 38px;
+  padding: 0 14px;
+  margin-top: 3px;
+
   border: none;
-  border-radius: 8px;
-  background: #1976d2;
-  color: white;
+  border-radius: 7px;
+
+  background: #222;
+  color: #ffffff;
+
   font-size: 13px;
   font-weight: 700;
+
   cursor: pointer;
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
+  transition: 0.2s ease;
 }
 
 .otp-button:hover:not(:disabled) {
-  background: #0d47a1;
   transform: translateY(-1px);
+  opacity: 0.9;
 }
 
 .otp-button:disabled {
   opacity: 0.75;
-  cursor: not-allowed;
-}
-
-.otp-box {
-  display: flex;
-  gap: 10px;
-  margin-top: 12px;
-}
-
-.otp-box input {
-  flex: 1;
-  height: 42px;
-  padding: 0 12px;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  outline: none;
-}
-
-.verify-button {
-  height: 42px;
-  padding: 0 18px;
-  border: none;
-  border-radius: 8px;
-  background: #1565c0;
-  color: white;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.verify-button:hover:not(:disabled) {
-  background: #0d47a1;
-}
-
-.verified-message {
-  margin: 8px 0 0;
-  color: #16803c;
-  font-size: 13px;
-  font-weight: 700;
+  cursor: default;
 }
 
 /* =========================================
-   TEAM MEMBER CARDS
+   VERIFIED MESSAGE
    ========================================= */
 
-.member-card {
-  margin-bottom: 18px;
-  padding: 20px;
-  border: 1px solid #dce6f3;
-  border-radius: 12px;
-  background: #f8fbff;
+.verified-message {
+  margin-top: 4px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.member-card:last-child {
-  margin-bottom: 0;
+/* =========================================
+   MEMBERS
+   ========================================= */
+
+.members-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.member-card {
+  padding: 20px;
+  background: #fafafa;
+  border: 1px solid #e4e4e4;
+  border-radius: 12px;
 }
 
 .member-card h3 {
-  margin: 0 0 17px;
-  color: #1565c0;
-  font-size: 16px;
+  font-size: 17px;
+  margin-bottom: 15px;
 }
 
 /* =========================================
-   EVENT SELECTION - PROFESSIONAL CARDS
+   EVENTS
    ========================================= */
 
 .event-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
 }
 
-/* Hide the default checkbox */
-.event-card input[type="checkbox"] {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* Main event card */
-.event-card {
-  position: relative;
+.event-option {
   display: flex;
   align-items: center;
-  min-height: 62px;
-  padding: 16px 18px;
-  border: 1px solid #d7e1ee;
-  border-radius: 11px;
+  gap: 10px;
+
+  min-height: 50px;
+  padding: 12px 14px;
+
+  border: 1px solid #dddddd;
+  border-radius: 9px;
+
   background: #ffffff;
-  color: #334155;
   cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.event-option:hover {
+  background: #f7f7f7;
+}
+
+.event-option input {
+  width: 17px;
+  height: 17px;
+  cursor: pointer;
+}
+
+.event-option span {
   font-size: 14px;
-  font-weight: 650;
-  transition:
-    border-color 0.2s ease,
-    background 0.2s ease,
-    box-shadow 0.2s ease,
-    transform 0.2s ease;
-}
-
-/* Small selection indicator */
-.event-card::before {
-  content: "";
-  width: 19px;
-  height: 19px;
-  flex: 0 0 19px;
-  margin-right: 12px;
-  border: 2px solid #b8c7d9;
-  border-radius: 5px;
-  background: white;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease;
-}
-
-/* Hover */
-.event-card:hover {
-  border-color: #1976d2;
-  box-shadow: 0 5px 15px rgba(25, 118, 210, 0.1);
-  transform: translateY(-1px);
-}
-
-/* Selected card */
-.event-card.selected {
-  border-color: #1976d2;
-  background: #f1f7ff;
-  color: #0d47a1;
-  box-shadow: 0 5px 16px rgba(25, 118, 210, 0.12);
-}
-
-/* Selected indicator */
-.event-card.selected::before {
-  content: "✓";
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #1976d2;
-  border-color: #1976d2;
-  color: white;
-  font-size: 12px;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 /* =========================================
    REGISTER BUTTON
    ========================================= */
 
-.submit-section {
+.submit-area {
   text-align: center;
-  padding: 25px 30px;
+  margin: 28px 0 40px;
 }
 
 .register-button {
-  width: 100%;
-  max-width: 450px;
-  height: 50px;
+  min-width: 210px;
+  height: 48px;
+
+  padding: 0 25px;
+
   border: none;
   border-radius: 9px;
-  background: linear-gradient(
-    135deg,
-    #0d47a1,
-    #1976d2
-  );
-  color: white;
+
+  background: #222;
+  color: #ffffff;
+
   font-size: 15px;
-  font-weight: 800;
-  letter-spacing: 0.3px;
-  cursor: pointer;
-  box-shadow: 0 7px 18px rgba(13, 71, 161, 0.22);
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.register-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 23px rgba(13, 71, 161, 0.3);
-}
-
-/* =========================================
-   SUCCESS SECTION
-   ========================================= */
-
-.success-section {
-  text-align: center;
-  border-color: #b9dfc5;
-  background: #f7fff9;
-}
-
-.success-section h2 {
-  color: #16803c;
-}
-
-.success-section p {
-  margin-bottom: 7px;
-  color: #475569;
-}
-
-.success-section strong {
-  display: block;
-  margin-bottom: 20px;
-  color: #0d47a1;
-  font-size: 25px;
-  letter-spacing: 1px;
-}
-
-.download-button {
-  height: 44px;
-  padding: 0 22px;
-  border: none;
-  border-radius: 8px;
-  background: #1976d2;
-  color: white;
   font-weight: 700;
+
   cursor: pointer;
+  transition: 0.2s ease;
 }
 
-.download-button:hover {
-  background: #0d47a1;
+.register-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
+.register-button:disabled {
+  opacity: 0.7;
+  cursor: default;
 }
 
 /* =========================================
@@ -445,13 +294,10 @@ select {
 
 .footer {
   text-align: center;
-  padding: 22px 15px 30px;
-  color: #64748b;
+  padding: 25px 15px 35px;
+  color: #666;
   font-size: 13px;
-}
-
-.footer p {
-  margin: 0;
+  line-height: 1.7;
 }
 
 /* =========================================
@@ -461,25 +307,29 @@ select {
 @media (max-width: 768px) {
 
   .header {
-    border-radius: 0 0 22px 22px;
-    padding: 25px 18px 30px;
+    padding: 25px 15px;
   }
 
   .header h1 {
-    font-size: 28px;
+    font-size: 34px;
   }
 
-  .header p {
+  .college-name {
+    font-size: 13px;
+  }
+
+  .symposium {
     font-size: 15px;
   }
 
   .container {
-    width: 94%;
-    margin-top: 22px;
+    width: min(100% - 20px, 1050px);
+    margin: 20px auto;
   }
 
   .section {
-    padding: 22px 18px;
+    padding: 18px;
+    border-radius: 12px;
   }
 
   .form-grid {
@@ -493,6 +343,14 @@ select {
   .event-grid {
     grid-template-columns: 1fr;
   }
+
+  .member-card {
+    padding: 16px;
+  }
+
+  .register-button {
+    width: 100%;
+  }
 }
 
 /* =========================================
@@ -502,52 +360,33 @@ select {
 @media (max-width: 480px) {
 
   .header h1 {
-    font-size: 24px;
-  }
-
-  .rit-logo {
-    width: 70px;
-    height: 70px;
-  }
-
-  .section {
-    padding: 20px 15px;
-    border-radius: 13px;
+    font-size: 30px;
+    letter-spacing: 2px;
   }
 
   .section h2 {
     font-size: 19px;
   }
 
-  .email-otp-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 10px;
-  }
-
   .otp-button {
-    width: 100%;
-    flex: none;
+    min-width: 118px;
+    height: 36px;
+    font-size: 12px;
+    padding: 0 12px;
   }
 
-  .otp-box {
-    flex-direction: column;
+  .field input,
+  .field select {
+    height: 43px;
+    font-size: 13px;
   }
 
-  .verify-button {
-    width: 100%;
+  .event-option {
+    min-height: 46px;
+    padding: 10px 12px;
   }
 
-  .member-card {
-    padding: 15px;
-  }
-
-  .event-card {
-    min-height: 58px;
-    padding: 14px;
-  }
-
-  .register-button {
+  .event-option span {
     font-size: 13px;
   }
 }
