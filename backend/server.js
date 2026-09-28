@@ -2,7 +2,6 @@ require("dotenv").config();
 
 const express = require("express");
 const cors = require("cors");
-const { Resend } = require("resend");
 const pool = require("./db");
 
 const app = express();
@@ -11,12 +10,6 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
-
-// ==========================================
-// RESEND EMAIL
-// ==========================================
-
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 // ==========================================
 // HOME
@@ -47,211 +40,13 @@ app.get("/api/events", async (req, res) => {
     `);
 
     res.json(result.rows);
+
   } catch (error) {
+
     console.error("Events Error:", error);
 
     res.status(500).json({
       message: "Failed to load events"
-    });
-  }
-});
-
-// ==========================================
-// SEND EMAIL OTP
-// ==========================================
-
-app.post("/api/send-email-otp", async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({
-        message: "Email is required"
-      });
-    }
-
-    const otp = Math.floor(
-      100000 + Math.random() * 900000
-    ).toString();
-
-    const expiresAt = new Date(
-      Date.now() + 5 * 60 * 1000
-    );
-
-    // Delete old OTP
-    await pool.query(
-      `
-      DELETE FROM verifications
-      WHERE email = $1
-      `,
-      [email]
-    );
-
-    // Save new OTP
-    await pool.query(
-      `
-      INSERT INTO verifications
-      (
-        email,
-        email_otp,
-        email_verified,
-        expires_at
-      )
-      VALUES ($1, $2, FALSE, $3)
-      `,
-      [email, otp, expiresAt]
-    );
-
-    // Send email using Resend
-    const { data, error } = await resend.emails.send({
-      from: "EventX 2026 <onboarding@resend.dev>",
-      to: [email],
-      subject: "EventX 2026 - Email Verification OTP",
-
-      html: `
-        <div style="
-          font-family: Arial, sans-serif;
-          max-width: 600px;
-          margin: auto;
-          padding: 20px;
-        ">
-
-          <h2 style="color:#1976d2;">
-            EventX 2026
-          </h2>
-
-          <p>Hello,</p>
-
-          <p>
-            Your Email Verification OTP for
-            <b>EventX 2026</b> is:
-          </p>
-
-          <div style="
-            font-size:32px;
-            font-weight:bold;
-            letter-spacing:8px;
-            padding:20px;
-            background:#f1f7ff;
-            text-align:center;
-            color:#1976d2;
-            border-radius:10px;
-          ">
-            ${otp}
-          </div>
-
-          <p>
-            This OTP is valid for
-            <b>5 minutes</b>.
-          </p>
-
-          <p>
-            If you did not request this OTP,
-            please ignore this email.
-          </p>
-
-          <hr>
-
-          <p>
-            <b>Ramco Institute of Technology</b><br>
-            EventX 2026 Symposium
-          </p>
-
-        </div>
-      `
-    });
-
-    if (error) {
-      console.error("❌ Resend Error:", error);
-
-      return res.status(500).json({
-        message: "Failed to send OTP",
-        error: error.message
-      });
-    }
-
-    console.log("✅ OTP Email Sent Successfully");
-
-    res.json({
-      message: "OTP sent successfully"
-    });
-
-  } catch (error) {
-    console.error("❌ Send OTP Error:", error);
-
-    res.status(500).json({
-      message: "Failed to send OTP",
-      error: error.message
-    });
-  }
-});
-
-// ==========================================
-// VERIFY EMAIL OTP
-// ==========================================
-
-app.post("/api/verify-email-otp", async (req, res) => {
-  try {
-    const { email, otp } = req.body;
-
-    if (!email || !otp) {
-      return res.status(400).json({
-        message: "Email and OTP are required"
-      });
-    }
-
-    const result = await pool.query(
-      `
-      SELECT *
-      FROM verifications
-      WHERE email = $1
-      ORDER BY created_at DESC
-      LIMIT 1
-      `,
-      [email]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(400).json({
-        message: "OTP not found"
-      });
-    }
-
-    const verification = result.rows[0];
-
-    if (verification.email_otp !== otp) {
-      return res.status(400).json({
-        message: "Invalid OTP"
-      });
-    }
-
-    if (
-      new Date() >
-      new Date(verification.expires_at)
-    ) {
-      return res.status(400).json({
-        message: "OTP expired"
-      });
-    }
-
-    await pool.query(
-      `
-      UPDATE verifications
-      SET email_verified = TRUE
-      WHERE verification_id = $1
-      `,
-      [verification.verification_id]
-    );
-
-    res.json({
-      message: "Email verified successfully"
-    });
-
-  } catch (error) {
-    console.error("❌ Verify OTP Error:", error);
-
-    res.status(500).json({
-      message: "Failed to verify OTP"
     });
   }
 });
@@ -279,7 +74,10 @@ app.post("/api/register", async (req, res) => {
       members
     } = req.body;
 
-    // Basic validation
+    // --------------------------------------
+    // BASIC VALIDATION
+    // --------------------------------------
+
     if (
       !name ||
       !phone ||
@@ -294,7 +92,20 @@ app.post("/api/register", async (req, res) => {
       });
     }
 
-    // Technical event
+    // --------------------------------------
+    // EMAIL VALIDATION
+    // --------------------------------------
+
+    if (!email.includes("@")) {
+      return res.status(400).json({
+        message: "Please enter a valid email address"
+      });
+    }
+
+    // --------------------------------------
+    // TECHNICAL EVENTS
+    // --------------------------------------
+
     if (
       !Array.isArray(technicalEvents) ||
       technicalEvents.length < 1
@@ -304,7 +115,10 @@ app.post("/api/register", async (req, res) => {
       });
     }
 
-    // Non technical event
+    // --------------------------------------
+    // NON TECHNICAL EVENTS
+    // --------------------------------------
+
     if (
       !Array.isArray(nonTechnicalEvents) ||
       nonTechnicalEvents.length < 1
@@ -313,6 +127,10 @@ app.post("/api/register", async (req, res) => {
         message: "Select at least one non-technical event"
       });
     }
+
+    // --------------------------------------
+    // MEMBERS
+    // --------------------------------------
 
     if (!Array.isArray(members)) {
       return res.status(400).json({
@@ -326,28 +144,10 @@ app.post("/api/register", async (req, res) => {
       });
     }
 
-    // Check email verification
-    const verificationResult = await pool.query(
-      `
-      SELECT email_verified
-      FROM verifications
-      WHERE email = $1
-      ORDER BY created_at DESC
-      LIMIT 1
-      `,
-      [email]
-    );
+    // --------------------------------------
+    // MEMBER DETAILS
+    // --------------------------------------
 
-    if (
-      verificationResult.rows.length === 0 ||
-      !verificationResult.rows[0].email_verified
-    ) {
-      return res.status(400).json({
-        message: "Please verify your email first"
-      });
-    }
-
-    // Check members
     for (const member of members) {
 
       if (
@@ -361,9 +161,16 @@ app.post("/api/register", async (req, res) => {
       }
     }
 
+    // --------------------------------------
+    // START TRANSACTION
+    // --------------------------------------
+
     await client.query("BEGIN");
 
-    // Duplicate team name
+    // --------------------------------------
+    // DUPLICATE TEAM NAME
+    // --------------------------------------
+
     const duplicateTeam = await client.query(
       `
       SELECT team_id
@@ -382,7 +189,10 @@ app.post("/api/register", async (req, res) => {
       });
     }
 
-    // Unique team ID
+    // --------------------------------------
+    // UNIQUE TEAM ID
+    // --------------------------------------
+
     const randomNumber = Math.floor(
       100000 + Math.random() * 900000
     );
@@ -390,7 +200,10 @@ app.post("/api/register", async (req, res) => {
     const uniqueTeamId =
       `EVX26-${randomNumber}`;
 
-    // Insert team
+    // --------------------------------------
+    // INSERT TEAM
+    // --------------------------------------
+
     const teamResult = await client.query(
       `
       INSERT INTO teams
@@ -419,7 +232,10 @@ app.post("/api/register", async (req, res) => {
     const teamId =
       teamResult.rows[0].team_id;
 
-    // Insert members
+    // --------------------------------------
+    // INSERT MEMBERS
+    // --------------------------------------
+
     for (const member of members) {
 
       await client.query(
@@ -445,13 +261,19 @@ app.post("/api/register", async (req, res) => {
       );
     }
 
-    // Combine events
+    // --------------------------------------
+    // COMBINE EVENTS
+    // --------------------------------------
+
     const allSelectedEvents = [
       ...technicalEvents,
       ...nonTechnicalEvents
     ];
 
-    // Register events
+    // --------------------------------------
+    // REGISTER EVENTS
+    // --------------------------------------
+
     for (const eventName of allSelectedEvents) {
 
       const eventResult = await client.query(
@@ -470,26 +292,35 @@ app.post("/api/register", async (req, res) => {
       );
 
       if (eventResult.rows.length === 0) {
+
         throw new Error(
           `Event not found: ${eventName}`
         );
       }
 
-      const event = eventResult.rows[0];
+      const event =
+        eventResult.rows[0];
 
-      // Team size validation
+      // ------------------------------------
+      // TEAM SIZE VALIDATION
+      // ------------------------------------
+
       if (
         Number(teamSize) <
           Number(event.min_team_size) ||
         Number(teamSize) >
           Number(event.max_team_size)
       ) {
+
         throw new Error(
           `${eventName} requires team size between ${event.min_team_size} and ${event.max_team_size}`
         );
       }
 
-      // Capacity check
+      // ------------------------------------
+      // CAPACITY CHECK
+      // ------------------------------------
+
       const participantResult =
         await client.query(
           `
@@ -518,12 +349,16 @@ app.post("/api/register", async (req, res) => {
           Number(teamSize) >
           Number(event.max_participants)
       ) {
+
         throw new Error(
           `${eventName} is full`
         );
       }
 
-      // Insert registration
+      // ------------------------------------
+      // INSERT REGISTRATION
+      // ------------------------------------
+
       await client.query(
         `
         INSERT INTO registrations
@@ -540,6 +375,10 @@ app.post("/api/register", async (req, res) => {
         ]
       );
     }
+
+    // --------------------------------------
+    // COMMIT
+    // --------------------------------------
 
     await client.query("COMMIT");
 
@@ -729,7 +568,7 @@ app.get(
 app.listen(PORT, () => {
 
   console.log(
-    `EventX Backend running on http://localhost:${PORT}`
+    `EventX Backend running on port ${PORT}`
   );
 
 });
