@@ -4,6 +4,7 @@ import { jsPDF } from "jspdf";
 import QRCode from "qrcode";
 import "./App.css";
 
+// Render backend URL
 const API_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -47,13 +48,12 @@ function App() {
 
   const [loading, setLoading] = useState(false);
 
-  // Simple email verification
+  // Email verification
   const [emailVerified, setEmailVerified] = useState(false);
 
   // -----------------------------
   // FORM CHANGE
   // -----------------------------
-
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -71,7 +71,6 @@ function App() {
   // -----------------------------
   // MEMBER CHANGE
   // -----------------------------
-
   const handleMemberChange = (index, field, value) => {
     setMembers((prev) => {
       const updated = [...prev];
@@ -88,7 +87,6 @@ function App() {
   // -----------------------------
   // EVENT CHANGE
   // -----------------------------
-
   const handleEventChange = (eventName, type) => {
     if (type === "technical") {
       setTechnical((prev) =>
@@ -106,12 +104,16 @@ function App() {
   };
 
   // -----------------------------
-  // SIMPLE EMAIL VERIFY
+  // VERIFY EMAIL
   // -----------------------------
-
   const verifyEmailNow = () => {
     if (!formData.email) {
       alert("Please enter your email address.");
+      return;
+    }
+
+    if (!formData.email.includes("@")) {
+      alert("Please enter a valid email address.");
       return;
     }
 
@@ -123,7 +125,6 @@ function App() {
   // -----------------------------
   // GENERATE RECEIPT
   // -----------------------------
-
   const generateReceipt = async (teamId) => {
     try {
       const qrData = `
@@ -148,17 +149,20 @@ Phone: ${formData.phone}
       // Header
       doc.setFontSize(20);
       doc.setFont("helvetica", "bold");
+
       doc.text("RAMCO INSTITUTE OF TECHNOLOGY", 105, 20, {
         align: "center",
       });
 
       doc.setFontSize(24);
+
       doc.text("EVENTX", 105, 32, {
         align: "center",
       });
 
       doc.setFontSize(14);
       doc.setFont("helvetica", "normal");
+
       doc.text("SYMPOSIUM 2026", 105, 41, {
         align: "center",
       });
@@ -169,19 +173,23 @@ Phone: ${formData.phone}
       // Receipt title
       doc.setFontSize(18);
       doc.setFont("helvetica", "bold");
+
       doc.text("REGISTRATION RECEIPT", 105, 60, {
         align: "center",
       });
 
       // Team ID
       doc.setFontSize(14);
+
       doc.text("Team ID:", 20, 75);
 
       doc.setFont("helvetica", "normal");
+
       doc.text(teamId, 55, 75);
 
       // Participant details
       doc.setFont("helvetica", "bold");
+
       doc.text("Team Details", 20, 90);
 
       doc.setFont("helvetica", "normal");
@@ -208,6 +216,7 @@ Phone: ${formData.phone}
       let y = 175;
 
       doc.setFont("helvetica", "bold");
+
       doc.text("Team Members", 20, y);
 
       y += 10;
@@ -228,6 +237,7 @@ Phone: ${formData.phone}
       y += 8;
 
       doc.setFont("helvetica", "bold");
+
       doc.text("Technical Events", 20, y);
 
       y += 8;
@@ -236,6 +246,7 @@ Phone: ${formData.phone}
 
       technical.forEach((event) => {
         doc.text(`• ${event}`, 25, y);
+
         y += 7;
       });
 
@@ -243,6 +254,7 @@ Phone: ${formData.phone}
       y += 5;
 
       doc.setFont("helvetica", "bold");
+
       doc.text("Non-Technical Events", 20, y);
 
       y += 8;
@@ -251,6 +263,7 @@ Phone: ${formData.phone}
 
       nonTechnical.forEach((event) => {
         doc.text(`• ${event}`, 25, y);
+
         y += 7;
       });
 
@@ -283,12 +296,8 @@ Phone: ${formData.phone}
 
       // Download PDF
       doc.save(`EventX_Registration_${teamId}.pdf`);
-
     } catch (error) {
-      console.error(
-        "Receipt generation error:",
-        error
-      );
+      console.error("Receipt generation error:", error);
 
       alert(
         "Registration completed, but PDF generation failed."
@@ -299,7 +308,6 @@ Phone: ${formData.phone}
   // -----------------------------
   // SUBMIT REGISTRATION
   // -----------------------------
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -348,6 +356,8 @@ Phone: ${formData.phone}
     try {
       setLoading(true);
 
+      // IMPORTANT:
+      // Uses Render backend in deployment
       const response = await axios.post(
         `${API_URL}/api/register`,
         {
@@ -383,13 +393,11 @@ Phone: ${formData.phone}
       setNonTechnical([]);
 
       setEmailVerified(false);
-
     } catch (error) {
-      console.error(error);
+      console.error("Registration Error:", error);
 
       alert(
-        error.response?.data?.message ||
-          error.response?.data?.error ||
+        error.response?.data?.error ||
           "Registration failed. Please try again."
       );
     } finally {
@@ -400,8 +408,9 @@ Phone: ${formData.phone}
   return (
     <div className="app">
 
-      {/* HEADER */}
-
+      {/* =====================================
+          HEADER
+          ===================================== */}
       <header className="header">
 
         <div className="college-name">
@@ -420,14 +429,16 @@ Phone: ${formData.phone}
 
       </header>
 
-      {/* MAIN CARD */}
-
+      {/* =====================================
+          MAIN
+          ===================================== */}
       <main className="container">
 
         <form onSubmit={handleSubmit}>
 
-          {/* PARTICIPANT DETAILS */}
-
+          {/* =====================================
+              PARTICIPANT DETAILS
+              ===================================== */}
           <section className="section">
 
             <h2>Participant Details</h2>
@@ -435,7 +446,6 @@ Phone: ${formData.phone}
             <div className="form-grid">
 
               {/* NAME */}
-
               <div className="field">
 
                 <label>
@@ -454,7 +464,6 @@ Phone: ${formData.phone}
               </div>
 
               {/* PHONE */}
-
               <div className="field">
 
                 <label>
@@ -473,7 +482,6 @@ Phone: ${formData.phone}
               </div>
 
               {/* EMAIL */}
-
               <div className="field full-width">
 
                 <label>
@@ -492,26 +500,19 @@ Phone: ${formData.phone}
                   required
                 />
 
-                {/* VERIFY BUTTON */}
-
+                {/* VERIFY EMAIL BUTTON */}
                 <button
                   type="button"
                   onClick={verifyEmailNow}
-                  disabled={
-                    !formData.email ||
-                    emailVerified
-                  }
+                  disabled={emailVerified}
                   className="otp-button"
                 >
-
                   {emailVerified
                     ? "EMAIL VERIFIED ✓"
                     : "VERIFY EMAIL"}
-
                 </button>
 
                 {/* VERIFIED MESSAGE */}
-
                 {emailVerified && (
                   <p className="verified-message">
                     ✓ Email verified successfully
@@ -521,7 +522,6 @@ Phone: ${formData.phone}
               </div>
 
               {/* DEPARTMENT */}
-
               <div className="field">
 
                 <label>
@@ -540,7 +540,6 @@ Phone: ${formData.phone}
               </div>
 
               {/* YEAR */}
-
               <div className="field">
 
                 <label>
@@ -579,7 +578,6 @@ Phone: ${formData.phone}
               </div>
 
               {/* TEAM NAME */}
-
               <div className="field">
 
                 <label>
@@ -598,7 +596,6 @@ Phone: ${formData.phone}
               </div>
 
               {/* TEAM SIZE */}
-
               <div className="field">
 
                 <label>
@@ -637,11 +634,11 @@ Phone: ${formData.phone}
               </div>
 
             </div>
-
           </section>
 
-          {/* TEAM MEMBERS */}
-
+          {/* =====================================
+              TEAM MEMBERS
+              ===================================== */}
           <section className="section">
 
             <h2>
@@ -662,21 +659,19 @@ Phone: ${formData.phone}
                 >
 
                   <h3>
-
                     Member {index + 1}
-
                     {index === 0 &&
                       " (Team Leader)"}
-
                   </h3>
 
                   <div className="form-grid">
 
                     {/* MEMBER NAME */}
-
                     <div className="field">
 
-                      <label>Name</label>
+                      <label>
+                        Name
+                      </label>
 
                       <input
                         type="text"
@@ -695,10 +690,11 @@ Phone: ${formData.phone}
                     </div>
 
                     {/* MEMBER PHONE */}
-
                     <div className="field">
 
-                      <label>Phone</label>
+                      <label>
+                        Phone
+                      </label>
 
                       <input
                         type="tel"
@@ -717,10 +713,11 @@ Phone: ${formData.phone}
                     </div>
 
                     {/* MEMBER EMAIL */}
-
                     <div className="field full-width">
 
-                      <label>Email</label>
+                      <label>
+                        Email
+                      </label>
 
                       <input
                         type="email"
@@ -748,8 +745,9 @@ Phone: ${formData.phone}
 
           </section>
 
-          {/* TECHNICAL EVENTS */}
-
+          {/* =====================================
+              TECHNICAL EVENTS
+              ===================================== */}
           <section className="section">
 
             <h2>
@@ -792,8 +790,9 @@ Phone: ${formData.phone}
 
           </section>
 
-          {/* NON TECHNICAL EVENTS */}
-
+          {/* =====================================
+              NON TECHNICAL EVENTS
+              ===================================== */}
           <section className="section">
 
             <h2>
@@ -836,8 +835,9 @@ Phone: ${formData.phone}
 
           </section>
 
-          {/* REGISTER BUTTON */}
-
+          {/* =====================================
+              REGISTER BUTTON
+              ===================================== */}
           <div className="submit-area">
 
             <button
@@ -845,11 +845,9 @@ Phone: ${formData.phone}
               className="register-button"
               disabled={loading}
             >
-
               {loading
                 ? "REGISTERING..."
                 : "REGISTER NOW"}
-
             </button>
 
           </div>
@@ -858,8 +856,9 @@ Phone: ${formData.phone}
 
       </main>
 
-      {/* FOOTER */}
-
+      {/* =====================================
+          FOOTER
+          ===================================== */}
       <footer className="footer">
 
         <p>
