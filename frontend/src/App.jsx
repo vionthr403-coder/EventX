@@ -875,4 +875,3 @@ Phone: ${formData.phone}
   );
 }
 
-export default App;
