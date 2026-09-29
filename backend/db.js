@@ -22,7 +22,7 @@ const pool = new Pool(
       }
 );
 
-// Prevent Neon idle connection errors from crashing the server
+// Prevent idle connection errors from crashing the server
 pool.on("error", (error) => {
   console.error("PostgreSQL Pool Error:", error.message);
 });
