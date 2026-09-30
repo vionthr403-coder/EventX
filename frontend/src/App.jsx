@@ -1,12 +1,13 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import axios from "axios";
-import { jsPDF } from "jspdf";
+import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import "./App.css";
 
-// Render backend URL
-const API_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+// =========================
+// LIVE BACKEND URL
+// =========================
+const API_URL = "https://eventx-s09g.onrender.com";
 
 const technicalEvents = [
   "Paper Presentation",
@@ -22,14 +23,6 @@ const nonTechnicalEvents = [
   "Fun Quiz",
 ];
 
-const createMembers = (size) => {
-  return Array.from({ length: Number(size) }, () => ({
-    name: "",
-    phone: "",
-    email: "",
-  }));
-};
-
 function App() {
   const [formData, setFormData] = useState({
     name: "",
@@ -38,39 +31,60 @@ function App() {
     department: "",
     year: "",
     teamName: "",
-    teamSize: "1",
+    teamSize: 1,
   });
 
-  const [members, setMembers] = useState(createMembers(1));
+  const [members, setMembers] = useState([
+    {
+      name: "",
+      phone: "",
+      email: "",
+    },
+  ]);
 
   const [technical, setTechnical] = useState([]);
   const [nonTechnical, setNonTechnical] = useState([]);
 
-  const [loading, setLoading] = useState(false);
-
-  // Email verification
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
 
-  // -----------------------------
+  const [registeredTeamId, setRegisteredTeamId] = useState("");
+
+  // =========================
   // FORM CHANGE
-  // -----------------------------
+  // =========================
   const handleChange = (e) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "teamSize" ? Number(value) : value,
     }));
 
-    // Team size change
     if (name === "teamSize") {
-      setMembers(createMembers(value));
+      const size = Number(value);
+
+      setMembers((prev) => {
+        const updated = [...prev];
+
+        while (updated.length < size) {
+          updated.push({
+            name: "",
+            phone: "",
+            email: "",
+          });
+        }
+
+        return updated.slice(0, size);
+      });
     }
   };
 
-  // -----------------------------
+  // =========================
   // MEMBER CHANGE
-  // -----------------------------
+  // =========================
   const handleMemberChange = (index, field, value) => {
     setMembers((prev) => {
       const updated = [...prev];
@@ -84,373 +98,307 @@ function App() {
     });
   };
 
-  // -----------------------------
-  // EVENT CHANGE
-  // -----------------------------
-  const handleEventChange = (eventName, type) => {
-    if (type === "technical") {
-      setTechnical((prev) =>
-        prev.includes(eventName)
-          ? prev.filter((event) => event !== eventName)
-          : [...prev, eventName]
-      );
-    } else {
-      setNonTechnical((prev) =>
-        prev.includes(eventName)
-          ? prev.filter((event) => event !== eventName)
-          : [...prev, eventName]
-      );
-    }
+  // =========================
+  // TECHNICAL EVENTS
+  // =========================
+  const toggleTechnical = (eventName) => {
+    setTechnical((prev) =>
+      prev.includes(eventName)
+        ? prev.filter((event) => event !== eventName)
+        : [...prev, eventName]
+    );
   };
 
-  // -----------------------------
-  // VERIFY EMAIL
-  // -----------------------------
-  const verifyEmailNow = () => {
+  // =========================
+  // NON TECHNICAL EVENTS
+  // =========================
+  const toggleNonTechnical = (eventName) => {
+    setNonTechnical((prev) =>
+      prev.includes(eventName)
+        ? prev.filter((event) => event !== eventName)
+        : [...prev, eventName]
+    );
+  };
+
+  // =========================
+  // SEND EMAIL OTP
+  // =========================
+  const sendEmailOTP = async () => {
     if (!formData.email) {
-      alert("Please enter your email address.");
+      alert("Please enter email address.");
       return;
     }
 
-    if (!formData.email.includes("@")) {
-      alert("Please enter a valid email address.");
-      return;
+    try {
+      setOtpLoading(true);
+
+      await axios.post(`${API_URL}/api/send-email-otp`, {
+        email: formData.email,
+      });
+
+      setOtpSent(true);
+
+      alert("OTP sent successfully to your email.");
+    } catch (error) {
+      console.error("OTP Error:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Failed to send OTP. Please try again."
+      );
+    } finally {
+      setOtpLoading(false);
     }
-
-    setEmailVerified(true);
-
-    alert("Email verified successfully! ✅");
   };
 
-  // -----------------------------
-  // GENERATE RECEIPT
-  // -----------------------------
+  // =========================
+  // VERIFY EMAIL OTP
+  // =========================
+  const verifyEmailOTP = async () => {
+    if (!otp || otp.length !== 6) {
+      alert("Please enter the 6-digit OTP.");
+      return;
+    }
+
+    try {
+      setOtpLoading(true);
+
+      const response = await axios.post(
+        `${API_URL}/api/verify-email-otp`,
+        {
+          email: formData.email,
+          otp,
+        }
+      );
+
+      if (response.data) {
+        setEmailVerified(true);
+        setOtpSent(false);
+
+        alert("Email verified successfully!");
+      }
+    } catch (error) {
+      console.error("Verify OTP Error:", error);
+
+      alert(
+        error.response?.data?.message ||
+          "Invalid or expired OTP."
+      );
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  // =========================
+  // GENERATE RECEIPT PDF
+  // =========================
   const generateReceipt = async (teamId) => {
     try {
-      const qrData = `
-EVENTX - SYMPOSIUM 2026
-Ramco Institute of Technology
-Team ID: ${teamId}
-Team Name: ${formData.teamName}
-Leader: ${formData.name}
-Email: ${formData.email}
-Phone: ${formData.phone}
-`;
+      const qrData = await QRCode.toDataURL(teamId);
 
-      // Generate QR Code
-      const qrImage = await QRCode.toDataURL(qrData, {
-        width: 250,
-        margin: 2,
-      });
-
-      // Create PDF
       const doc = new jsPDF();
 
-      // Header
-      doc.setFontSize(20);
-      doc.setFont("helvetica", "bold");
-
-      doc.text("RAMCO INSTITUTE OF TECHNOLOGY", 105, 20, {
+      doc.setFontSize(22);
+      doc.text("EVENTX 2026", 105, 25, {
         align: "center",
       });
 
-      doc.setFontSize(24);
-
-      doc.text("EVENTX", 105, 32, {
+      doc.setFontSize(13);
+      doc.text("Ramco Institute of Technology", 105, 35, {
         align: "center",
       });
 
-      doc.setFontSize(14);
-      doc.setFont("helvetica", "normal");
-
-      doc.text("SYMPOSIUM 2026", 105, 41, {
-        align: "center",
-      });
-
-      // Line
-      doc.line(15, 48, 195, 48);
-
-      // Receipt title
       doc.setFontSize(18);
-      doc.setFont("helvetica", "bold");
-
-      doc.text("REGISTRATION RECEIPT", 105, 60, {
+      doc.text("Registration Receipt", 105, 50, {
         align: "center",
       });
 
-      // Team ID
-      doc.setFontSize(14);
+      doc.setFontSize(12);
 
-      doc.text("Team ID:", 20, 75);
+      let y = 70;
 
-      doc.setFont("helvetica", "normal");
-
-      doc.text(teamId, 55, 75);
-
-      // Participant details
-      doc.setFont("helvetica", "bold");
-
-      doc.text("Team Details", 20, 90);
-
-      doc.setFont("helvetica", "normal");
-
-      doc.text(`Team Name: ${formData.teamName}`, 20, 100);
-      doc.text(`Team Leader: ${formData.name}`, 20, 110);
-      doc.text(`Phone: ${formData.phone}`, 20, 120);
-      doc.text(`Email: ${formData.email}`, 20, 130);
-      doc.text(`Department: ${formData.department}`, 20, 140);
-      doc.text(`Year: ${formData.year}`, 20, 150);
-      doc.text(`Team Size: ${formData.teamSize}`, 20, 160);
-
-      // QR Code
-      doc.addImage(
-        qrImage,
-        "PNG",
-        145,
-        75,
-        45,
-        45
-      );
-
-      // Members
-      let y = 175;
-
-      doc.setFont("helvetica", "bold");
-
-      doc.text("Team Members", 20, y);
-
+      doc.text(`Team ID: ${teamId}`, 20, y);
       y += 10;
 
-      doc.setFont("helvetica", "normal");
+      doc.text(`Team Name: ${formData.teamName}`, 20, y);
+      y += 10;
 
-      members.forEach((member, index) => {
-        doc.text(
-          `${index + 1}. ${member.name} | ${member.phone}`,
-          20,
-          y
-        );
+      doc.text(`Team Leader: ${formData.name}`, 20, y);
+      y += 10;
 
-        y += 8;
-      });
+      doc.text(`Email: ${formData.email}`, 20, y);
+      y += 10;
 
-      // Technical Events
+      doc.text(`Phone: ${formData.phone}`, 20, y);
+      y += 10;
+
+      doc.text(`Department: ${formData.department}`, 20, y);
+      y += 10;
+
+      doc.text(`Year: ${formData.year}`, 20, y);
+      y += 10;
+
+      doc.text(`Team Size: ${formData.teamSize}`, 20, y);
+      y += 15;
+
+      doc.setFontSize(13);
+      doc.text("Technical Events:", 20, y);
       y += 8;
 
-      doc.setFont("helvetica", "bold");
-
-      doc.text("Technical Events", 20, y);
-
-      y += 8;
-
-      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
 
       technical.forEach((event) => {
-        doc.text(`• ${event}`, 25, y);
-
+        doc.text(`• ${event}`, 28, y);
         y += 7;
       });
 
-      // Non Technical Events
       y += 5;
 
-      doc.setFont("helvetica", "bold");
-
-      doc.text("Non-Technical Events", 20, y);
-
+      doc.setFontSize(13);
+      doc.text("Non-Technical Events:", 20, y);
       y += 8;
 
-      doc.setFont("helvetica", "normal");
+      doc.setFontSize(11);
 
       nonTechnical.forEach((event) => {
-        doc.text(`• ${event}`, 25, y);
-
+        doc.text(`• ${event}`, 28, y);
         y += 7;
       });
 
-      // Footer
-      y += 10;
-
-      doc.line(15, y, 195, y);
-
-      y += 10;
+      // QR CODE
+      doc.addImage(qrData, "PNG", 140, 70, 45, 45);
 
       doc.setFontSize(10);
 
       doc.text(
         "Please keep this receipt for future reference.",
         105,
-        y,
+        270,
         {
           align: "center",
         }
       );
 
-      doc.text(
-        "EventX • Ramco Institute of Technology • 2026",
-        105,
-        y + 7,
-        {
-          align: "center",
-        }
-      );
-
-      // Download PDF
-      doc.save(`EventX_Registration_${teamId}.pdf`);
+      doc.save(`EventX_Receipt_${teamId}.pdf`);
     } catch (error) {
-      console.error("Receipt generation error:", error);
+      console.error("Receipt Error:", error);
 
-      alert(
-        "Registration completed, but PDF generation failed."
-      );
+      alert("Failed to generate receipt.");
     }
   };
 
-  // -----------------------------
-  // SUBMIT REGISTRATION
-  // -----------------------------
+  // =========================
+  // REGISTER
+  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Email verification check
     if (!emailVerified) {
-      alert("Please verify your email before registration.");
+      alert("Please verify team leader email first.");
       return;
     }
 
-    // Technical event check
-    if (technical.length === 0) {
-      alert(
-        "Please select at least one Technical Event."
-      );
+    if (technical.length < 1) {
+      alert("Please select at least 1 technical event.");
       return;
     }
 
-    // Non-technical event check
-    if (nonTechnical.length === 0) {
-      alert(
-        "Please select at least one Non-Technical Event."
-      );
+    if (nonTechnical.length < 1) {
+      alert("Please select at least 1 non-technical event.");
       return;
     }
 
-    // Team size check
-    if (!formData.teamSize) {
-      alert("Please select team size.");
+    if (members.length !== Number(formData.teamSize)) {
+      alert("Team member count does not match team size.");
       return;
     }
 
-    // Member validation
     for (let i = 0; i < members.length; i++) {
       if (
         !members[i].name ||
         !members[i].phone ||
         !members[i].email
       ) {
-        alert(
-          `Please fill all details for Member ${i + 1}.`
-        );
+        alert(`Please fill all details for Member ${i + 1}.`);
         return;
       }
     }
 
     try {
-      setLoading(true);
-
-      // IMPORTANT:
-      // Uses Render backend in deployment
       const response = await axios.post(
         `${API_URL}/api/register`,
         {
-          ...formData,
+          name: formData.name,
+          phone: formData.phone,
+          email: formData.email,
+          department: formData.department,
+          year: Number(formData.year),
+          teamName: formData.teamName,
+          teamSize: Number(formData.teamSize),
+
           technicalEvents: technical,
           nonTechnicalEvents: nonTechnical,
-          members: members,
+
+          members,
         }
       );
 
-      const teamId = response.data.uniqueTeamId;
+      const teamId =
+        response.data.uniqueTeamId ||
+        response.data.teamId;
+
+      setRegisteredTeamId(teamId);
 
       alert(
-        `Registration Successful! 🎉\n\nYour Team ID: ${teamId}`
+        `Registration successful!\n\nYour Team ID: ${teamId}`
       );
 
       await generateReceipt(teamId);
-
-      // Reset form
-      setFormData({
-        name: "",
-        phone: "",
-        email: "",
-        department: "",
-        year: "",
-        teamName: "",
-        teamSize: "1",
-      });
-
-      setMembers(createMembers(1));
-
-      setTechnical([]);
-      setNonTechnical([]);
-
-      setEmailVerified(false);
     } catch (error) {
       console.error("Registration Error:", error);
 
       alert(
-        error.response?.data?.error ||
+        error.response?.data?.message ||
           "Registration failed. Please try again."
       );
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <div className="app">
 
-      {/* =====================================
-          HEADER
-          ===================================== */}
+      {/* ================= HEADER ================= */}
       <header className="header">
 
-        <div className="college-name">
-          RAMCO INSTITUTE OF TECHNOLOGY
-        </div>
+        <img
+          src="/rit-logo.png"
+          alt="Ramco Institute of Technology"
+          className="rit-logo"
+        />
 
-        <h1>EVENTX</h1>
+        <h1>EVENTX 2026</h1>
 
-        <p className="symposium">
-          SYMPOSIUM 2026
-        </p>
+        <p>Ramco Institute of Technology</p>
 
-        <p className="tagline">
-          Innovate • Compete • Conquer
-        </p>
+        <span>Symposium Registration</span>
 
       </header>
 
-      {/* =====================================
-          MAIN
-          ===================================== */}
+      {/* ================= MAIN ================= */}
       <main className="container">
 
         <form onSubmit={handleSubmit}>
 
-          {/* =====================================
-              PARTICIPANT DETAILS
-              ===================================== */}
+          {/* ================= PARTICIPANT DETAILS ================= */}
           <section className="section">
 
             <h2>Participant Details</h2>
 
             <div className="form-grid">
 
-              {/* NAME */}
               <div className="field">
 
-                <label>
-                  Team Leader Name
-                </label>
+                <label>Team Leader Name</label>
 
                 <input
                   type="text"
@@ -463,12 +411,9 @@ Phone: ${formData.phone}
 
               </div>
 
-              {/* PHONE */}
               <div className="field">
 
-                <label>
-                  Team Leader Phone
-                </label>
+                <label>Phone Number</label>
 
                 <input
                   type="tel"
@@ -484,39 +429,81 @@ Phone: ${formData.phone}
               {/* EMAIL */}
               <div className="field full-width">
 
-                <label>
-                  Team Leader Email
-                </label>
+                <label>Team Leader Email</label>
 
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Enter email address"
-                  value={formData.email}
-                  onChange={(e) => {
-                    handleChange(e);
-                    setEmailVerified(false);
-                  }}
-                  required
-                />
+                <div className="email-otp-row">
 
-                {/* VERIFY EMAIL BUTTON */}
-                <button
-                  type="button"
-                  onClick={verifyEmailNow}
-                  disabled={emailVerified}
-                  className="otp-button"
-                >
-                  {emailVerified
-                    ? "EMAIL VERIFIED ✓"
-                    : "VERIFY EMAIL"}
-                </button>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter email address"
+                    value={formData.email}
+                    onChange={(e) => {
+                      handleChange(e);
 
-                {/* VERIFIED MESSAGE */}
+                      setEmailVerified(false);
+                      setOtpSent(false);
+                      setOtp("");
+                    }}
+                    required
+                  />
+
+                  <button
+                    type="button"
+                    onClick={sendEmailOTP}
+                    disabled={
+                      otpLoading || emailVerified
+                    }
+                    className="otp-button"
+                  >
+
+                    {emailVerified
+                      ? "EMAIL VERIFIED ✓"
+                      : otpLoading
+                      ? "SENDING..."
+                      : "SEND OTP"}
+
+                  </button>
+
+                </div>
+
+                {otpSent && !emailVerified && (
+
+                  <div className="otp-box">
+
+                    <input
+                      type="text"
+                      placeholder="Enter 6-digit OTP"
+                      value={otp}
+                      maxLength="6"
+                      onChange={(e) =>
+                        setOtp(e.target.value)
+                      }
+                    />
+
+                    <button
+                      type="button"
+                      onClick={verifyEmailOTP}
+                      disabled={otpLoading}
+                      className="verify-button"
+                    >
+
+                      {otpLoading
+                        ? "VERIFYING..."
+                        : "VERIFY OTP"}
+
+                    </button>
+
+                  </div>
+
+                )}
+
                 {emailVerified && (
+
                   <p className="verified-message">
                     ✓ Email verified successfully
                   </p>
+
                 )}
 
               </div>
@@ -524,14 +511,12 @@ Phone: ${formData.phone}
               {/* DEPARTMENT */}
               <div className="field">
 
-                <label>
-                  Department
-                </label>
+                <label>Department</label>
 
                 <input
                   type="text"
                   name="department"
-                  placeholder="Example: MCA"
+                  placeholder="Enter department"
                   value={formData.department}
                   onChange={handleChange}
                   required
@@ -542,9 +527,7 @@ Phone: ${formData.phone}
               {/* YEAR */}
               <div className="field">
 
-                <label>
-                  Year
-                </label>
+                <label>Year</label>
 
                 <select
                   name="year"
@@ -558,19 +541,19 @@ Phone: ${formData.phone}
                   </option>
 
                   <option value="1">
-                    1st Year
+                    I Year
                   </option>
 
                   <option value="2">
-                    2nd Year
+                    II Year
                   </option>
 
                   <option value="3">
-                    3rd Year
+                    III Year
                   </option>
 
                   <option value="4">
-                    4th Year
+                    IV Year
                   </option>
 
                 </select>
@@ -580,14 +563,12 @@ Phone: ${formData.phone}
               {/* TEAM NAME */}
               <div className="field">
 
-                <label>
-                  Team Name
-                </label>
+                <label>Team Name</label>
 
                 <input
                   type="text"
                   name="teamName"
-                  placeholder="Enter unique team name"
+                  placeholder="Enter team name"
                   value={formData.teamName}
                   onChange={handleChange}
                   required
@@ -598,9 +579,7 @@ Phone: ${formData.phone}
               {/* TEAM SIZE */}
               <div className="field">
 
-                <label>
-                  Team Size
-                </label>
+                <label>Team Size</label>
 
                 <select
                   name="teamSize"
@@ -634,127 +613,101 @@ Phone: ${formData.phone}
               </div>
 
             </div>
+
           </section>
 
-          {/* =====================================
-              TEAM MEMBERS
-              ===================================== */}
+          {/* ================= TEAM MEMBERS ================= */}
           <section className="section">
 
-            <h2>
-              Team Members
-            </h2>
+            <h2>Team Members</h2>
 
-            <p className="section-info">
-              Enter details of all team members.
-            </p>
+            {members.map((member, index) => (
 
-            <div className="members-container">
+              <div
+                className="member-card"
+                key={index}
+              >
 
-              {members.map((member, index) => (
+                <h3>
+                  Member {index + 1}
+                  {index === 0
+                    ? " (Team Leader)"
+                    : ""}
+                </h3>
 
-                <div
-                  className="member-card"
-                  key={index}
-                >
+                <div className="form-grid">
 
-                  <h3>
-                    Member {index + 1}
-                    {index === 0 &&
-                      " (Team Leader)"}
-                  </h3>
+                  <div className="field">
 
-                  <div className="form-grid">
+                    <label>Name</label>
 
-                    {/* MEMBER NAME */}
-                    <div className="field">
+                    <input
+                      type="text"
+                      value={member.name}
+                      onChange={(e) =>
+                        handleMemberChange(
+                          index,
+                          "name",
+                          e.target.value
+                        )
+                      }
+                      required
+                    />
 
-                      <label>
-                        Name
-                      </label>
+                  </div>
 
-                      <input
-                        type="text"
-                        placeholder="Member name"
-                        value={member.name}
-                        onChange={(e) =>
-                          handleMemberChange(
-                            index,
-                            "name",
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
+                  <div className="field">
 
-                    </div>
+                    <label>Phone</label>
 
-                    {/* MEMBER PHONE */}
-                    <div className="field">
+                    <input
+                      type="tel"
+                      value={member.phone}
+                      onChange={(e) =>
+                        handleMemberChange(
+                          index,
+                          "phone",
+                          e.target.value
+                        )
+                      }
+                      required
+                    />
 
-                      <label>
-                        Phone
-                      </label>
+                  </div>
 
-                      <input
-                        type="tel"
-                        placeholder="Phone number"
-                        value={member.phone}
-                        onChange={(e) =>
-                          handleMemberChange(
-                            index,
-                            "phone",
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
+                  <div className="field full-width">
 
-                    </div>
+                    <label>Email</label>
 
-                    {/* MEMBER EMAIL */}
-                    <div className="field full-width">
-
-                      <label>
-                        Email
-                      </label>
-
-                      <input
-                        type="email"
-                        placeholder="Email address"
-                        value={member.email}
-                        onChange={(e) =>
-                          handleMemberChange(
-                            index,
-                            "email",
-                            e.target.value
-                          )
-                        }
-                        required
-                      />
-
-                    </div>
+                    <input
+                      type="email"
+                      value={member.email}
+                      onChange={(e) =>
+                        handleMemberChange(
+                          index,
+                          "email",
+                          e.target.value
+                        )
+                      }
+                      required
+                    />
 
                   </div>
 
                 </div>
 
-              ))}
+              </div>
 
-            </div>
+            ))}
 
           </section>
 
-          {/* =====================================
-              TECHNICAL EVENTS
-              ===================================== */}
+          {/* ================= TECHNICAL EVENTS ================= */}
           <section className="section">
 
-            <h2>
-              Technical Events
-            </h2>
+            <h2>Technical Events</h2>
 
-            <p className="section-info">
+            <p>
               Select at least one technical event.
             </p>
 
@@ -763,7 +716,11 @@ Phone: ${formData.phone}
               {technicalEvents.map((event) => (
 
                 <label
-                  className="event-option"
+                  className={`event-card ${
+                    technical.includes(event)
+                      ? "selected"
+                      : ""
+                  }`}
                   key={event}
                 >
 
@@ -771,16 +728,11 @@ Phone: ${formData.phone}
                     type="checkbox"
                     checked={technical.includes(event)}
                     onChange={() =>
-                      handleEventChange(
-                        event,
-                        "technical"
-                      )
+                      toggleTechnical(event)
                     }
                   />
 
-                  <span>
-                    {event}
-                  </span>
+                  <span>{event}</span>
 
                 </label>
 
@@ -790,16 +742,12 @@ Phone: ${formData.phone}
 
           </section>
 
-          {/* =====================================
-              NON TECHNICAL EVENTS
-              ===================================== */}
+          {/* ================= NON TECHNICAL EVENTS ================= */}
           <section className="section">
 
-            <h2>
-              Non-Technical Events
-            </h2>
+            <h2>Non-Technical Events</h2>
 
-            <p className="section-info">
+            <p>
               Select at least one non-technical event.
             </p>
 
@@ -808,7 +756,11 @@ Phone: ${formData.phone}
               {nonTechnicalEvents.map((event) => (
 
                 <label
-                  className="event-option"
+                  className={`event-card ${
+                    nonTechnical.includes(event)
+                      ? "selected"
+                      : ""
+                  }`}
                   key={event}
                 >
 
@@ -816,16 +768,11 @@ Phone: ${formData.phone}
                     type="checkbox"
                     checked={nonTechnical.includes(event)}
                     onChange={() =>
-                      handleEventChange(
-                        event,
-                        "nonTechnical"
-                      )
+                      toggleNonTechnical(event)
                     }
                   />
 
-                  <span>
-                    {event}
-                  </span>
+                  <span>{event}</span>
 
                 </label>
 
@@ -835,38 +782,58 @@ Phone: ${formData.phone}
 
           </section>
 
-          {/* =====================================
-              REGISTER BUTTON
-              ===================================== */}
-          <div className="submit-area">
+          {/* ================= REGISTER ================= */}
+          <section className="section submit-section">
 
             <button
               type="submit"
               className="register-button"
-              disabled={loading}
             >
-              {loading
-                ? "REGISTERING..."
-                : "REGISTER NOW"}
+              REGISTER FOR EVENTX 2026
             </button>
 
-          </div>
+          </section>
 
         </form>
 
+        {/* ================= SUCCESS ================= */}
+        {registeredTeamId && (
+
+          <section className="section success-section">
+
+            <h2>
+              Registration Successful 🎉
+            </h2>
+
+            <p>
+              Your Team ID:
+            </p>
+
+            <strong>
+              {registeredTeamId}
+            </strong>
+
+            <button
+              type="button"
+              onClick={() =>
+                generateReceipt(registeredTeamId)
+              }
+              className="download-button"
+            >
+              Download Registration Receipt
+            </button>
+
+          </section>
+
+        )}
+
       </main>
 
-      {/* =====================================
-          FOOTER
-          ===================================== */}
+      {/* ================= FOOTER ================= */}
       <footer className="footer">
 
         <p>
-          © 2026 EventX • Ramco Institute of Technology
-        </p>
-
-        <p>
-          Innovate • Compete • Conquer
+          © 2026 EventX | Ramco Institute of Technology
         </p>
 
       </footer>
@@ -875,3 +842,4 @@ Phone: ${formData.phone}
   );
 }
 
+export default App;
