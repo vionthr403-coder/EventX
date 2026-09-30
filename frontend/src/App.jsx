@@ -234,8 +234,38 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    if (!formData.name.trim()) {
+      alert("Please enter team leader name.");
+      return;
+    }
+
+    if (!formData.phone.trim()) {
+      alert("Please enter phone number.");
+      return;
+    }
+
+    if (!formData.email.trim()) {
+      alert("Please enter email address.");
+      return;
+    }
+
     if (!emailVerified) {
-      alert("Please verify team leader email first.");
+      alert("Please click VERIFY beside the email first.");
+      return;
+    }
+
+    if (!formData.department.trim()) {
+      alert("Please enter department.");
+      return;
+    }
+
+    if (!formData.year) {
+      alert("Please select year.");
+      return;
+    }
+
+    if (!formData.teamName.trim()) {
+      alert("Please enter team name.");
       return;
     }
 
@@ -256,9 +286,9 @@ function App() {
 
     for (let i = 0; i < members.length; i++) {
       if (
-        !members[i].name ||
-        !members[i].phone ||
-        !members[i].email
+        !members[i].name.trim() ||
+        !members[i].phone.trim() ||
+        !members[i].email.trim()
       ) {
         alert(`Please fill all details for Member ${i + 1}.`);
         return;
@@ -266,32 +296,38 @@ function App() {
     }
 
     try {
+      const registerButton = document.querySelector(".register-button");
+      if (registerButton) registerButton.disabled = true;
+
       const response = await axios.post(
         `${API_URL}/api/register`,
         {
-          name: formData.name,
-          phone: formData.phone,
-          email: formData.email,
-          department: formData.department,
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim(),
+          department: formData.department.trim(),
           year: Number(formData.year),
-          teamName: formData.teamName,
+          teamName: formData.teamName.trim(),
           teamSize: Number(formData.teamSize),
-
           technicalEvents: technical,
           nonTechnicalEvents: nonTechnical,
-
           members,
-        }
+        },
+        { timeout: 30000 }
       );
 
       const teamId =
         response.data.uniqueTeamId ||
         response.data.teamId;
 
+      if (!teamId) {
+        throw new Error("Registration completed but Team ID was not returned.");
+      }
+
       setRegisteredTeamId(teamId);
 
       alert(
-        `Registration successful!\n\nYour Team ID: ${teamId}`
+        `Registration successful!\\n\\nYour Team ID: ${teamId}`
       );
 
       await generateReceipt(teamId);
@@ -300,8 +336,12 @@ function App() {
 
       alert(
         error.response?.data?.message ||
-          "Registration failed. Please try again."
+        error.message ||
+        "Registration failed. Please try again."
       );
+    } finally {
+      const registerButton = document.querySelector(".register-button");
+      if (registerButton) registerButton.disabled = false;
     }
   };
 
@@ -347,7 +387,6 @@ function App() {
                   placeholder="Enter your name"
                   value={formData.name}
                   onChange={handleChange}
-                  required
                 />
 
               </div>
@@ -362,7 +401,6 @@ function App() {
                   placeholder="Enter phone number"
                   value={formData.phone}
                   onChange={handleChange}
-                  required
                 />
 
               </div>
@@ -383,8 +421,7 @@ function App() {
                       handleChange(e);
                       setEmailVerified(false);
                     }}
-                    required
-                  />
+                   />
 
                   <button
                     type="button"
@@ -416,7 +453,6 @@ function App() {
                   placeholder="Enter department"
                   value={formData.department}
                   onChange={handleChange}
-                  required
                 />
 
               </div>
@@ -430,7 +466,6 @@ function App() {
                   name="year"
                   value={formData.year}
                   onChange={handleChange}
-                  required
                 >
 
                   <option value="">
@@ -468,7 +503,6 @@ function App() {
                   placeholder="Enter team name"
                   value={formData.teamName}
                   onChange={handleChange}
-                  required
                 />
 
               </div>
@@ -482,7 +516,6 @@ function App() {
                   name="teamSize"
                   value={formData.teamSize}
                   onChange={handleChange}
-                  required
                 >
 
                   <option value="1">
@@ -548,8 +581,7 @@ function App() {
                           e.target.value
                         )
                       }
-                      required
-                    />
+                       />
 
                   </div>
 
@@ -567,8 +599,7 @@ function App() {
                           e.target.value
                         )
                       }
-                      required
-                    />
+                       />
 
                   </div>
 
@@ -586,8 +617,7 @@ function App() {
                           e.target.value
                         )
                       }
-                      required
-                    />
+                       />
 
                   </div>
 
