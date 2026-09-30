@@ -45,10 +45,7 @@ function App() {
   const [technical, setTechnical] = useState([]);
   const [nonTechnical, setNonTechnical] = useState([]);
 
-  const [otp, setOtp] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
-  const [otpLoading, setOtpLoading] = useState(false);
 
   const [registeredTeamId, setRegisteredTeamId] = useState("");
 
@@ -121,72 +118,16 @@ function App() {
   };
 
   // =========================
-  // SEND EMAIL OTP
+  // VERIFY EMAIL
   // =========================
-  const sendEmailOTP = async () => {
+  const verifyEmail = () => {
     if (!formData.email) {
       alert("Please enter email address.");
       return;
     }
 
-    try {
-      setOtpLoading(true);
-
-      await axios.post(`${API_URL}/api/send-email-otp`, {
-        email: formData.email,
-      });
-
-      setOtpSent(true);
-
-      alert("OTP sent successfully to your email.");
-    } catch (error) {
-      console.error("OTP Error:", error);
-
-      alert(
-        error.response?.data?.message ||
-          "Failed to send OTP. Please try again."
-      );
-    } finally {
-      setOtpLoading(false);
-    }
-  };
-
-  // =========================
-  // VERIFY EMAIL OTP
-  // =========================
-  const verifyEmailOTP = async () => {
-    if (!otp || otp.length !== 6) {
-      alert("Please enter the 6-digit OTP.");
-      return;
-    }
-
-    try {
-      setOtpLoading(true);
-
-      const response = await axios.post(
-        `${API_URL}/api/verify-email-otp`,
-        {
-          email: formData.email,
-          otp,
-        }
-      );
-
-      if (response.data) {
-        setEmailVerified(true);
-        setOtpSent(false);
-
-        alert("Email verified successfully!");
-      }
-    } catch (error) {
-      console.error("Verify OTP Error:", error);
-
-      alert(
-        error.response?.data?.message ||
-          "Invalid or expired OTP."
-      );
-    } finally {
-      setOtpLoading(false);
-    }
+    setEmailVerified(true);
+    alert("Email verified successfully!");
   };
 
   // =========================
@@ -440,70 +381,26 @@ function App() {
                     value={formData.email}
                     onChange={(e) => {
                       handleChange(e);
-
                       setEmailVerified(false);
-                      setOtpSent(false);
-                      setOtp("");
                     }}
                     required
                   />
 
                   <button
                     type="button"
-                    onClick={sendEmailOTP}
-                    disabled={
-                      otpLoading || emailVerified
-                    }
-                    className="otp-button"
+                    onClick={verifyEmail}
+                    disabled={emailVerified}
+                    className="verify-button"
                   >
-
-                    {emailVerified
-                      ? "EMAIL VERIFIED ✓"
-                      : otpLoading
-                      ? "SENDING..."
-                      : "SEND OTP"}
-
+                    {emailVerified ? "VERIFIED ✓" : "VERIFY"}
                   </button>
 
                 </div>
 
-                {otpSent && !emailVerified && (
-
-                  <div className="otp-box">
-
-                    <input
-                      type="text"
-                      placeholder="Enter 6-digit OTP"
-                      value={otp}
-                      maxLength="6"
-                      onChange={(e) =>
-                        setOtp(e.target.value)
-                      }
-                    />
-
-                    <button
-                      type="button"
-                      onClick={verifyEmailOTP}
-                      disabled={otpLoading}
-                      className="verify-button"
-                    >
-
-                      {otpLoading
-                        ? "VERIFYING..."
-                        : "VERIFY OTP"}
-
-                    </button>
-
-                  </div>
-
-                )}
-
                 {emailVerified && (
-
                   <p className="verified-message">
                     ✓ Email verified successfully
                   </p>
-
                 )}
 
               </div>
