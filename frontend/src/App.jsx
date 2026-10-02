@@ -3,6 +3,7 @@ import axios from "axios";
 import jsPDF from "jspdf";
 import QRCode from "qrcode";
 import "./App.css";
+import AdminDashboard from "./AdminDashboard";
 
 // =========================
 // LIVE BACKEND URL
@@ -24,6 +25,9 @@ const nonTechnicalEvents = [
 ];
 
 function App() {
+  if (window.location.pathname === "/admin") {
+    return <AdminDashboard />;
+  }
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
